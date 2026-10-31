@@ -150,7 +150,7 @@ else
         });
         const icon = electron_1.nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aL1sAAAAASUVORK5CYII=');
         tray = new electron_1.Tray(icon);
-        tray.setToolTip('轻阅 Electron');
+        tray.setToolTip('轻阅');
         tray.setContextMenu(electron_1.Menu.buildFromTemplate([{ label: '显示并找回', click: recover }, { label: '退出', click: () => win.close() }]));
         tray.on('double-click', recover);
         bindHotkey(settings.bossKey);

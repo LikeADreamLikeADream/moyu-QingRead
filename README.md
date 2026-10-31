@@ -1,6 +1,6 @@
-# 轻阅 · Electron 本地阅读器
+# 轻阅 本地阅读器
 
-轻阅是一款免费、无需登录的本地电子书阅读器。当前版本为 **0.2.0**，使用 Electron + TypeScript/JavaScript，支持 TXT、EPUB、MOBI 和 AZW3。
+轻阅是一款免费、无需登录的本地电子书阅读器。当前版本为 **0.1.0**，使用 Electron + TypeScript/JavaScript，支持 TXT、EPUB、MOBI 和 AZW3。
 
 书籍由 JavaScript 后台线程解析，书架数据使用 Electron 内置 Node.js SQLite 保存。
 
@@ -9,7 +9,7 @@
 运行打包目录中的：
 
 ```text
-artifacts/QingRead-Electron/win-unpacked/轻阅 Electron.exe
+artifacts/QingRead-Electron/win-unpacked/轻阅.exe
 ```
 
 请保留整个 `win-unpacked` 目录，不能只复制 exe。运行时不需要安装 Node.js 或开发工具。
@@ -17,7 +17,7 @@ artifacts/QingRead-Electron/win-unpacked/轻阅 Electron.exe
 当前开发机的最新运行文件为：
 
 ```text
-C:\Users\Mr.Li\Documents\ChatGPT\moyu\artifacts\QingRead-Electron\win-unpacked\轻阅 Electron.exe
+artifacts\QingRead-Electron\win-unpacked\轻阅.exe
 ```
 
 重新打包只更新上述项目产物，不会自动更新其他位置的解压副本，例如 `D:\software\轻阅-Electron版\win-unpacked`。若使用独立安装目录，应先从托盘退出软件，再用最新完整运行目录替换旧程序文件；已有快捷方式也应指向更新后的程序。
@@ -80,7 +80,7 @@ C:\Users\Mr.Li\Documents\ChatGPT\moyu\artifacts\QingRead-Electron\win-unpacked\�
 
 ## 开发
 
-使用 VS Code 或 WebStorm 打开项目根目录 `C:\Users\Mr.Li\Documents\ChatGPT\moyu`。当前活动源码位于 [electron](electron/) 目录。
+使用 VS Code 或 WebStorm 打开项目根目录。当前活动源码位于 [electron](electron/) 目录。
 
 开发环境使用 Node.js 24 和 pnpm 11.25.0；依赖版本由 `electron/pnpm-lock.yaml` 锁定。当前 Electron 版本为 44.7.0。
 

@@ -313,7 +313,7 @@ else
                 win.setOpacity(settings.opacity);
                 win.setAlwaysOnTop(Boolean(settings.topmost));
                 win.setContentProtection(Boolean(settings.captureProtection));
-                tray.setToolTip(settings.hideTrayText ? '' : '轻阅 Electron');
+                tray.setToolTip(settings.hideTrayText ? '' : '轻阅');
                 save();
                 return settings;
             }
@@ -323,7 +323,7 @@ else
         });
         const icon = electron_1.nativeImage.createFromPath(node_path_1.default.join(uiRoot, 'tray.png'));
         tray = new electron_1.Tray(icon);
-        tray.setToolTip('轻阅 Electron');
+        tray.setToolTip('轻阅');
         updateTrayLanguage();
         tray.on('double-click', recover);
         if (settings.hideTrayText)

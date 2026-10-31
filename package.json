@@ -2,7 +2,7 @@
   "name": "moyu",
   "version": "0.2.0",
   "private": true,
-  "description": "轻阅 Electron 本地阅读器开发入口",
+  "description": "轻阅 本地阅读器开发入口",
   "scripts": {
     "deps:install": "pnpm --dir electron install --frozen-lockfile",
     "start": "pnpm --dir electron start",

@@ -109,13 +109,13 @@ else app.whenReady().then(async()=>{
   if(method==='settings'){
    if(data.bossKey!==undefined){if(typeof data.bossKey!=='string'||!data.bossKey.trim())throw new Error('老板键不能为空');data={...data,bossKey:data.bossKey.trim()};if(data.bossKey!==activeBossKey||!globalShortcut.isRegistered(activeBossKey)){if(!bindHotkey(data.bossKey))throw new Error('老板键无效或已被占用，请换一个组合键');if(activeBossKey&&activeBossKey!==data.bossKey)globalShortcut.unregister(activeBossKey);activeBossKey=data.bossKey;editingBossKey=false;}}
    settings={...settings,...data};settings.opacity=Math.max(.01,Math.min(1,Number(settings.opacity)||1));
-   win.setOpacity(settings.opacity);win.setAlwaysOnTop(Boolean(settings.topmost));win.setContentProtection(Boolean(settings.captureProtection));tray.setToolTip(settings.hideTrayText?'':'轻阅 Electron');save();return settings;
+   win.setOpacity(settings.opacity);win.setAlwaysOnTop(Boolean(settings.topmost));win.setContentProtection(Boolean(settings.captureProtection));tray.setToolTip(settings.hideTrayText?'':'轻阅');save();return settings;
   }
   if(!['list','open','preferences','position','search','bookmarks','addBookmark','removeBookmark','category','removeBook','editBook'].includes(method))throw new Error('Unsupported operation');
   return rpc(method,data);
  });
  const icon=nativeImage.createFromPath(path.join(uiRoot,'tray.png'));
- tray=new Tray(icon);tray.setToolTip('轻阅 Electron');updateTrayLanguage();tray.on('double-click',recover);
+ tray=new Tray(icon);tray.setToolTip('轻阅');updateTrayLanguage();tray.on('double-click',recover);
  if(settings.hideTrayText)tray.setToolTip('');
  if(settings.trayIcon){const savedIcon=nativeImage.createFromPath(path.join(root,'electron-tray.png'));if(!savedIcon.isEmpty())tray.setImage(savedIcon);}
  const requestedBossKey=settings.bossKey;

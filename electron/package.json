@@ -18,7 +18,7 @@
   },
   "build": {
     "appId": "local.qingread.reader",
-    "productName": "轻阅 Electron",
+    "productName": "轻阅",
     "directories": {
       "output": "../artifacts/QingRead-Electron"
     },
