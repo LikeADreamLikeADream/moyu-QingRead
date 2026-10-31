@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      exists: ${{ steps.version.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Determine release version
+        id: version
+        shell: pwsh
+        run: |
+          $tags = @(git tag --list 'v0.1.*' | Where-Object { $_ -match '^v0\.1\.\d+$' })
+          $existing = @(git tag --points-at $env:GITHUB_SHA | Where-Object { $_ -match '^v0\.1\.\d+$' })
+          if ($existing.Count -gt 0) {
+            'exists=true' >> $env:GITHUB_OUTPUT
+          } else {
+            $patch = 0
+            if ($tags.Count -gt 0) {
+              $patch = 1 + ($tags | ForEach-Object { [int]($_ -split '\.')[2] } | Measure-Object -Maximum).Maximum
+            }
+            "version=0.1.$patch" >> $env:GITHUB_OUTPUT
+            'exists=false' >> $env:GITHUB_OUTPUT
+          }
+
+  build:
+    needs: version
+    if: needs.version.outputs.exists != 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+            target: zip
+            arch: x64
+          - os: macos-latest
+            platform: mac
+            target: zip
+            arch: x64
+          - os: macos-latest
+            platform: mac
+            target: zip
+            arch: arm64
+          - os: ubuntu-latest
+            platform: linux
+            target: tar.gz
+            arch: x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      RELEASE_VERSION: ${{ needs.version.outputs.version }}
+      BUILD_PLATFORM: ${{ matrix.platform }}
+      BUILD_TARGET: ${{ matrix.target }}
+      BUILD_ARCH: ${{ matrix.arch }}
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install pnpm
+        run: npm install --global pnpm@11.25.0
+      - name: Install dependencies
+        run: pnpm run deps:install
+      - name: Compile application
+        run: pnpm run build
+      - name: Package application
+        run: |
+          pnpm --dir electron exec electron-builder "--$env:BUILD_PLATFORM" "$env:BUILD_TARGET" "--$env:BUILD_ARCH" --publish never "--config.extraMetadata.version=$env:RELEASE_VERSION" '--config.artifactName=QingRead-${version}-${os}-${arch}.${ext}'
+          if ($LASTEXITCODE -ne 0) { throw 'Application packaging failed.' }
+      - name: Upload release assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}-${{ matrix.arch }}
+          path: |
+            artifacts/QingRead-Electron/QingRead-*.zip
+            artifacts/QingRead-Electron/QingRead-*.tar.gz
+          if-no-files-found: error
+
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release assets
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: release-assets
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_VERSION: ${{ needs.version.outputs.version }}
+        shell: bash
+        run: |
+          gh release create "v$RELEASE_VERSION" release-assets/* --target "$GITHUB_SHA" --title "轻阅 v$RELEASE_VERSION" --generate-notes --latest
