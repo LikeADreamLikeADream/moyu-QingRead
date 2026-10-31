@@ -1,10 +1,25 @@
 # 轻阅 本地阅读器
 
-轻阅是一款免费、无需登录的本地电子书阅读器。当前版本为 **0.1.0**，使用 Electron + TypeScript/JavaScript，支持 TXT、EPUB、MOBI 和 AZW3。
+**简体中文** | [English](README.en.md)
+
+轻阅是一款免费、无需登录的本地电子书阅读器。基础版本为 **0.1.0**，最新发布版本请查看 [Releases](https://github.com/LikeADreamLikeADream/moyu-QingRead/releases)。使用 Electron + TypeScript/JavaScript，支持 TXT、EPUB、MOBI 和 AZW3。
 
 书籍由 JavaScript 后台线程解析，书架数据使用 Electron 内置 Node.js SQLite 保存。
 
-## 运行软件
+## 下载与运行
+
+前往 [GitHub Releases](https://github.com/LikeADreamLikeADream/moyu-QingRead/releases) 下载适合系统和处理器架构的压缩包：
+
+| 系统 | 架构 | 文件 |
+| --- | --- | --- |
+| Windows | x64 | `QingRead-<版本>-win-x64.zip` |
+| macOS（Intel） | x64 | `QingRead-<版本>-mac-x64.zip` |
+| macOS（Apple Silicon） | arm64 | `QingRead-<版本>-mac-arm64.zip` |
+| Linux | x64 | `QingRead-<版本>-linux-x64.tar.gz` |
+
+Windows 解压后运行 `轻阅.exe`；macOS 解压后打开 `.app`；Linux 解压后运行目录中的应用程序。请保留解压后的完整目录，运行时不需要安装 Node.js 或开发工具。发布流程已配置以上构建目标，macOS 和 Linux 尚未完成实机运行验证；当前未配置代码签名与 macOS 公证。
+
+### Windows 本地打包目录
 
 运行打包目录中的：
 
@@ -84,15 +99,16 @@
 
 开发环境使用 Node.js 24 和 pnpm 11.25.0；依赖版本由 `electron/pnpm-lock.yaml` 锁定。当前 Electron 版本为 44.7.0。
 
-项目使用 pnpm 11.25.0；首次使用前可执行 `npm install -g pnpm@11.25.0` 安装。依赖下载到项目外的共享仓库，可用 `pnpm --dir electron store path` 查看位置。`electron/pnpm-workspace.yaml` 使用隔离依赖布局，通过符号链接组织依赖，并通过硬链接复用共享仓库文件；当前打包流程已按此布局验证。项目中仍保留 `electron/node_modules/`，不要手动移动它。
+项目使用 pnpm 11.25.0；首次使用前可执行 `npm install -g pnpm@11.25.0` 安装。依赖下载到项目外的共享仓库，可用 `pnpm --dir electron store path` 查看位置。`electron/pnpm-workspace.yaml` 使用隔离依赖布局，通过符号链接组织依赖，并通过硬链接复用共享仓库文件。项目中仍保留 `electron/node_modules/`，不要手动移动它。
 
 根目录统一提供 `pnpm run deps:install`、`pnpm start`、`pnpm run build`、`pnpm test` 和 `pnpm run package`。仅使用 pnpm 安装依赖，避免生成不同的锁文件。
 
 在项目根目录执行：
 
 ```powershell
-cd electron
-pnpm install --frozen-lockfile
+npm install -g pnpm@11.25.0
+pnpm run deps:install
+pnpm --dir electron exec install-electron
 pnpm start
 ```
 
@@ -104,21 +120,22 @@ pnpm run build
 
 上述命令可在项目根目录执行；也可进入 `electron/` 使用原有命令。`electron/src/` 是当前源码，必须保留。
 
-## 打包
+## 本地 Windows 打包
 
-先通过托盘菜单“退出”关闭正在运行的轻阅，避免文件占用。在 `electron` 目录执行：
+先通过托盘菜单“退出”关闭正在运行的轻阅，避免文件占用。在项目根目录执行：
 
 ```powershell
-pnpm run package --config.electronDist=node_modules/electron/dist
+pnpm --dir electron exec install-electron
+pnpm run package
 ```
 
-该命令使用 `pnpm install --frozen-lockfile` 安装的本地 Electron 运行时，编译并生成 Windows 运行目录：
+上述命令先下载本地 Electron 运行时，再编译并生成 Windows 运行目录：
 
 ```text
 artifacts/QingRead-Electron/win-unpacked/
 ```
 
-当前默认只更新 exe 运行目录，**不生成或更新压缩包**；仅在明确需要时单独压缩。已有 ZIP 文件可能早于最新运行目录，分发前需按需更新。
+本地打包命令默认只更新 exe 运行目录，**不生成或更新压缩包**；仅在明确需要时单独压缩。已有 ZIP 文件可能早于最新运行目录，分发前需按需更新。
 
 需要压缩包时，在项目根目录执行：
 
@@ -128,6 +145,17 @@ Compress-Archive -LiteralPath 'artifacts/QingRead-Electron/win-unpacked' -Destin
 
 解压新版压缩包不会更新其他旧解压目录；请确认实际启动路径。
 
+## 自动发布
+
+[发布工作流](.github/workflows/release.yml) 在代码推送到 `main` 后执行，也可在 GitHub Actions 中选择 `Release`，从 `main` 分支手动运行。
+
+- Windows x64、macOS x64 / arm64 和 Linux x64 分别构建，所有构建成功后统一发布一个 GitHub Release，并附带四个下载包。
+- 未存在 `v0.1.*` 正式标签时，从 `v0.1.0` 开始；之后按现有 `v0.1.*` 标签的最大补丁号递增，例如 `v0.1.1`、`v0.1.2`。
+- 构建时将发布版本写入包内元数据，不自动修改或提交仓库中的 `package.json`。
+- 同一提交已有 `v0.1.*` 正式标签时跳过重复发布。
+- 使用 GitHub 自带的 `GITHUB_TOKEN`，发布任务已声明 `contents: write` 权限，无需另行添加个人访问令牌。
+- 此流程发布可下载的新版本；已安装客户端不会因此自动更新。
+
 ## 数据与兼容
 
 Windows 默认数据目录：
@@ -135,6 +163,8 @@ Windows 默认数据目录：
 ```text
 %LOCALAPPDATA%/QingRead.Reader
 ```
+
+macOS 和 Linux 使用 Electron 的 `app.getPath('userData')` 目录；设置 `QINGREAD_READER_DATA` 后，各系统均使用指定目录。
 
 主要内容为 `library.db`、`books/`、字体缓存、`electron-window.json` 和 `electron-shelf.json`。复制备份整个数据目录前，应先从托盘完全退出软件。
 
@@ -147,7 +177,7 @@ pnpm start
 Remove-Item Env:QINGREAD_READER_DATA
 ```
 
-该启动示例在 `electron` 目录执行。书籍元数据、进度与设置使用 SQLite 保存，正文和图片缓存在书籍目录中。需要修复的 MOBI 缓存会在打开时重新解析，并保留备份；大型书籍首次修复需要等待。
+该启动示例可在项目根目录执行。书籍元数据、进度与设置使用 SQLite 保存，正文和图片缓存在书籍目录中。需要修复的 MOBI 缓存会在打开时重新解析，并保留备份；大型书籍首次修复需要等待。
 
 ## 验证
 
@@ -180,12 +210,13 @@ pnpm test
 
 部分界面检查使用模拟桌面接口验证界面行为与保存调用，不代表真实数据库的端到端覆盖；字体、书签及导入存储另有实际模块检查。专项检查不全部包含在 `pnpm test` 中，需按改动选择执行。
 
-自动检查不等同于所有书籍的兼容性保证。MOBI/KF8 格式变体仍需按具体文件验证，受保护内容不保证可读取；含 `encryption.xml` 的 EPUB 当前会拒绝导入。当前交付为 Windows 版本，macOS 尚未完成当前版本的实机验证。
+自动检查不等同于所有书籍的兼容性保证。MOBI/KF8 格式变体仍需按具体文件验证，受保护内容不保证可读取；含 `encryption.xml` 的 EPUB 当前会拒绝导入。发布工作流已配置 Windows、macOS 和 Linux 构建；构建成功不等同于实机运行验证，macOS 和 Linux 尚未完成当前版本的实机验证。
 
 ## 项目结构
 
 | 路径 | 用途 |
 | --- | --- |
+| `.github/workflows/release.yml` | 跨平台构建、自动版本号与 GitHub Release 发布 |
 | `electron/src/main.ts` | 窗口、托盘、快捷键、字体导入入口、本地资源协议及 IPC |
 | `electron/src/preload.ts` | 向界面提供受限的桌面接口 |
 | `electron/src/library.ts` | SQLite 存储、导入、书架、进度、书签及缓存修复 |
