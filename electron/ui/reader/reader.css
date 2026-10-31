@@ -1,0 +1,16 @@
+:root{--paper:#f7f2e8;--ink:#333c38;--font:20px;--line:1.9;--margin:48px;--family:'Microsoft YaHei'}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden;background:var(--paper);color:var(--ink)}
+body{font-family:var(--family),sans-serif;font-size:var(--font);line-height:var(--line)}
+#viewport{height:100%;overflow-y:auto;overflow-x:hidden;outline:none;scroll-behavior:auto}
+#content{max-width:860px;margin:0 auto;padding:32px var(--margin) 80px;overflow-wrap:anywhere}
+p{margin:0 0 1em;white-space:pre-wrap;text-align:justify;text-indent:2em}
+h2{font-size:1.35em;font-weight:500;line-height:1.6;margin:0 0 1.5em;break-after:avoid}
+figure{margin:18px 0;text-align:center;break-inside:avoid}img{display:block;max-width:100%;max-height:75vh;object-fit:contain;margin:auto}
+figcaption{font-size:.7em;opacity:.55}mark{background:#e9cb7c;color:#252c27;border-radius:2px}
+.compact p{margin-bottom:.2em}.compact #content{padding-top:12px}
+.paged #viewport{overflow:hidden}.paged #content{max-width:none;padding:0;height:calc(100% - 48px);margin:24px var(--margin);column-fill:auto;column-gap:calc(var(--margin)*2)}
+::selection{background:#c6ddd3}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#a5b6aa70;border-radius:5px}
+#single{display:none}.single #content{display:none}.single #single{display:block;font-size:var(--single-font);white-space:nowrap;overflow:hidden;line-height:1.5;padding:4px 12px}.single #viewport{overflow:hidden}
+@font-face{font-family:'QingRead WenKai';src:url('qingread://fonts/wenkai.ttf') format('truetype');font-weight:400;font-style:normal;}
+
+#viewport{position:relative}

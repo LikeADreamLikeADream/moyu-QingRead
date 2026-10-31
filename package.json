@@ -1,0 +1,14 @@
+{
+  "name": "moyu",
+  "version": "0.2.0",
+  "private": true,
+  "description": "轻阅 Electron 本地阅读器开发入口",
+  "scripts": {
+    "deps:install": "pnpm --dir electron install --frozen-lockfile",
+    "start": "pnpm --dir electron start",
+    "build": "pnpm --dir electron run build",
+    "test": "pnpm --dir electron test",
+    "package": "pnpm --dir electron run package --config.electronDist=node_modules/electron/dist"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

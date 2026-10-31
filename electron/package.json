@@ -1,0 +1,46 @@
+{
+  "name": "qingread-electron",
+  "version": "0.2.0",
+  "private": true,
+  "description": "轻阅 Windows 本地阅读器",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "pnpm run build && electron .",
+    "package": "pnpm run build && electron-builder --win dir",
+    "test": "pnpm run build && node ../tests/electron-native-check.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "electron": "44.7.0",
+    "electron-builder": "^26.0.0",
+    "typescript": "7.0.2"
+  },
+  "build": {
+    "appId": "local.qingread.reader",
+    "productName": "轻阅 Electron",
+    "directories": {
+      "output": "../artifacts/QingRead-Electron"
+    },
+    "files": [
+      "dist/**/*",
+      "ui/**/*",
+      "package.json"
+    ],
+    "extraResources": [],
+    "win": {
+      "target": "dir",
+      "signAndEditExecutable": false
+    },
+    "electronLanguages": [
+      "zh-CN",
+      "en-US"
+    ]
+  },
+  "dependencies": {
+    "@lingo-reader/mobi-parser": "0.4.6",
+    "jszip": "3.10.1",
+    "linkedom": "0.18.12"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

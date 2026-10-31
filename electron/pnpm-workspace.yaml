@@ -1,0 +1,7 @@
+nodeLinker: isolated
+packageImportMethod: hardlink
+allowBuilds:
+  electron: true
+  typescript: true
+  electron-winstaller: false
+
