@@ -9,7 +9,7 @@
 运行打包目录中的：
 
 ```text
-artifacts/QingRead-Electron/win-unpacked/轻阅.exe
+./artifacts/QingRead-Electron/win-unpacked/轻阅.exe
 ```
 
 请保留整个 `win-unpacked` 目录，不能只复制 exe。运行时不需要安装 Node.js 或开发工具。
@@ -17,15 +17,15 @@ artifacts/QingRead-Electron/win-unpacked/轻阅.exe
 当前开发机的最新运行文件为：
 
 ```text
-artifacts\QingRead-Electron\win-unpacked\轻阅.exe
+.\artifacts\QingRead-Electron\win-unpacked\轻阅.exe
 ```
 
-重新打包只更新上述项目产物，不会自动更新其他位置的解压副本，例如 `D:\software\轻阅-Electron版\win-unpacked`。若使用独立安装目录，应先从托盘退出软件，再用最新完整运行目录替换旧程序文件；已有快捷方式也应指向更新后的程序。
+重新打包只更新上述项目产物，不会自动更新其他位置的解压副本。若使用独立安装目录，应先从托盘退出软件，再用最新完整运行目录替换旧程序文件；已有快捷方式也应指向更新后的程序。
 
 - 软件默认以小窗启动，右上角提供透明、透明度调整、置顶、大小窗、最小化和关闭图标。
 - 关闭按钮将窗口隐藏到系统托盘，并保存阅读位置；双击托盘图标，或选择托盘菜单“显示并找回”恢复窗口。
 - 完全关闭软件需要在托盘菜单中选择“退出”。
-- 默认老板键为 `Alt+Z`，可隐藏或找回窗口，也可在阅读设置中修改。
+- 默认老板键为 `Ctrl+Alt+Z`，可隐藏或找回窗口，也可在阅读设置中修改。
 
 ## 书架
 
