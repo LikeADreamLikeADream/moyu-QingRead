@@ -92,7 +92,7 @@ async function savePosition(){if(!active)return;position=currentPosition();if(po
 async function openBook(item){if(!$('shelfSettingsPanel').hidden)shelfSettingsPanel(false);await savePosition();await writing;const data=await call('open',{id:item.id});clearJumpOrigin();active=item;book=data.book;prefs=data.preferences;position=data.position;chapter=Math.max(0,book.chapters.findIndex(c=>c.key===position?.chapterKey));$('library').hidden=true;$('reading').hidden=false;$('toolbar').hidden=false;$('title').textContent=item.title;side='';$('sidebar').hidden=true;$('settings').hidden=true;appearance();fields();await render(position?.offset||0);}
 async function render(offset=0){const c=book.chapters[chapter];token=crypto.randomUUID();await reader().loadChapter({token,bookId:active.id,length:c.text.length,blocks:c.blocks||c.text.split('\n').map(text=>({kind:'p',text}))},offset,{...prefs,transparent:settings.transparent,single});$('mode').textContent=prefs.mode==='paged'?'翻页':'滚动';}
 async function savePrefs(){if(!active)return;await queue('preferences',{id:active.id,value:prefs});reader().setSettings({...prefs,transparent:settings.transparent,single});}
-const definitions=[['fontSize','字号','number',12,36],['lineHeight','行距','number',1.2,2.4,.1],['margin','左右边距','number',8,64],['font','字体',['Microsoft YaHei','SimSun','KaiTi','FangSong','SimHei','QingRead WenKai']],['theme','背景',['paper','light','night','green']],['textColor','文字颜色','color'],['backgroundColor','背景颜色','color'],['compact','紧凑段落','checkbox'],['spread','宽窗双栏','checkbox'],['autoSeconds','翻页间隔（秒）','number',5,120],['autoSpeed','滚动速度','number',10,100],['pauseOnLeave','移出暂停','checkbox'],['pauseOnMinimize','最小化暂停','checkbox'],['singleMode','单行模式',['horizontal','vertical']],['singleSpeed','单行速度','number',1,30],['singleFontSize','单行字号','number',12,36],['previousKey','上一页按键','text'],['nextKey','下一页按键','text']];
+const definitions=[['fontSize','字号','number',12,36],['lineHeight','行距','number',1.2,2.4,.1],['margin','左右边距','number',8,64],['font','字体',['Microsoft YaHei','SimSun','KaiTi','FangSong','SimHei','QingRead WenKai']],['fontBold','字体加粗','checkbox'],['theme','背景',['paper','light','night','green']],['textColor','文字颜色','color'],['backgroundColor','背景颜色','color'],['compact','紧凑段落','checkbox'],['spread','宽窗双栏','checkbox'],['autoSeconds','翻页间隔（秒）','number',5,120],['autoSpeed','滚动速度','number',10,100],['pauseOnLeave','移出暂停','checkbox'],['pauseOnMinimize','最小化暂停','checkbox'],['singleMode','单行模式',['horizontal','vertical']],['singleSpeed','单行速度','number',1,30],['singleFontSize','单行字号','number',12,36],['previousKey','上一页按键','text'],['nextKey','下一页按键','text']];
 const optionLabels={'Microsoft YaHei':'微软雅黑','SimSun':'宋体','KaiTi':'楷体','FangSong':'仿宋','SimHei':'黑体','QingRead WenKai':'霞鹜文楷',paper:'纸张',light:'明亮',night:'夜间',green:'护眼',horizontal:'横向滚动',vertical:'纵向滚动'};
 function defaultColor(key){const colors={paper:['#333c38','#f7f2e8'],light:['#303735','#ffffff'],night:['#c4cdc5','#202725'],green:['#2c4737','#e4eee5']};return (colors[prefs.theme]||colors.paper)[key==='textColor'?0:1];}
 let activeColorPicker=null;
@@ -112,6 +112,15 @@ function colorPicker(input,key,title){
 }
 window.addEventListener('blur',()=>{if(document.activeElement===$('reader'))activeColorPicker?.hidePopover();});
 document.addEventListener('pointerdown',event=>{for(const panel of document.querySelectorAll('.color-popover:popover-open,.font-select-panel:popover-open')){if(!panel.contains(event.target)&&!panel.previousElementSibling?.contains(event.target))panel.hidePopover();}},true);
+function positionDropdown(panel){
+ const trigger=panel.previousElementSibling,rect=trigger.getBoundingClientRect();
+ if(!rect.width||!rect.height||rect.bottom<=0||rect.top>=innerHeight||rect.right<=0||rect.left>=innerWidth){panel.hidePopover();return;}
+ for(let parent=trigger.parentElement;parent&&parent!==document.body;parent=parent.parentElement){const style=getComputedStyle(parent);if(/auto|scroll|hidden|clip/.test(style.overflowY)){const bounds=parent.getBoundingClientRect();if(rect.bottom<=bounds.top||rect.top>=bounds.bottom){panel.hidePopover();return;}}}
+ panel.style.left=rect.left+'px';panel.style.top=rect.bottom+4+'px';panel.style.width=rect.width+'px';
+}
+function positionOpenDropdowns(event){for(const panel of document.querySelectorAll('.font-select-panel:popover-open')){if(event?.target instanceof Node&&panel.contains(event.target))continue;positionDropdown(panel);}}
+document.addEventListener('scroll',positionOpenDropdowns,true);
+window.addEventListener('resize',positionOpenDropdowns);
 function fontControls(input){
  const wrapper=document.createElement('span');wrapper.className='font-controls';const search=document.createElement('input');search.type='search';search.autofocus=true;search.placeholder='搜索字体';search.setAttribute('aria-label','搜索字体');
  const choices=[...new Set([...definitions.find(d=>d[0]==='font')[2],...importedFonts.map(f=>f.family),prefs.font].filter(Boolean))];
@@ -183,7 +192,7 @@ $('jumpPercent').onchange=run(()=>jumpToPercent($('jumpPercent').value));
 $('jumpPercent').onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();$('jumpPercent').blur();}};
 document.addEventListener('pointerdown',event=>{if(!$('jumpPanel').contains(event.target)&&!$('jump').contains(event.target))$('jumpPanel').hidden=true;});
 document.addEventListener('keydown',event=>{if(event.key==='Escape')$('jumpPanel').hidden=true;});
-$('reset').onclick=run(async()=>{prefs={fontSize:20,lineHeight:1.9,margin:48,font:'Microsoft YaHei',theme:'paper',mode:'scroll',autoSeconds:20,autoSpeed:30,spread:true,pauseOnLeave:true,pauseOnMinimize:true,singleMode:'horizontal',singleSpeed:2,singleFontSize:15,previousKey:'Left',nextKey:'Right'};fields();await savePrefs();});
+$('reset').onclick=run(async()=>{prefs={fontSize:20,lineHeight:1.9,margin:48,font:'Microsoft YaHei',fontBold:false,theme:'paper',mode:'scroll',autoSeconds:20,autoSpeed:30,spread:true,pauseOnLeave:true,pauseOnMinimize:true,singleMode:'horizontal',singleSpeed:2,singleFontSize:15,previousKey:'Left',nextKey:'Right'};fields();await savePrefs();});
 function pointer(edge){document.body.classList.remove('hoverHidden');if(edge)document.body.classList.remove('toolbarHidden');clearTimeout(hideTimer);hideTimer=setTimeout(()=>{if(!edge&&book&&settings.autoHide&&$('sidebar').hidden&&$('settings').hidden)document.body.classList.add('toolbarHidden');},1500);}
 document.addEventListener('pointermove',e=>pointer(e.clientY<32||e.clientY>innerHeight-32));
 function windowPointer(inside){if(inside){document.body.classList.remove('hoverHidden');return;}if(prefs.pauseOnLeave)reader()?.pause();if(book&&settings.hideOnLeave&&!$('prompt').open)document.body.classList.add('hoverHidden');}

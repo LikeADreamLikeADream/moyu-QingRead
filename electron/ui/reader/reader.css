@@ -14,3 +14,5 @@ figcaption{font-size:.7em;opacity:.55}mark{background:#e9cb7c;color:#252c27;bord
 @font-face{font-family:'QingRead WenKai';src:url('qingread://fonts/wenkai.ttf') format('truetype');font-weight:400;font-style:normal;}
 
 #viewport{position:relative}
+
+body.bold,body.bold h2{font-weight:700}

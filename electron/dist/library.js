@@ -9,7 +9,7 @@ const node_path_1 = __importDefault(require("node:path"));
 const node_crypto_1 = require("node:crypto");
 const node_sqlite_1 = require("node:sqlite");
 const node_worker_threads_1 = require("node:worker_threads");
-const defaults = { fontSize: 20, lineHeight: 1.9, margin: 48, theme: 'paper', font: 'Microsoft YaHei', mode: 'scroll', compact: false, autoSeconds: 20, textColor: null, backgroundColor: null, spread: true, autoSpeed: 30, pauseOnLeave: true, pauseOnMinimize: true, previousKey: 'Left', nextKey: 'Right', singleMode: 'horizontal', singleSpeed: 2, singleFontSize: 15 };
+const defaults = { fontSize: 20, lineHeight: 1.9, margin: 48, theme: 'paper', font: 'Microsoft YaHei', fontBold: false, mode: 'scroll', compact: false, autoSeconds: 20, textColor: null, backgroundColor: null, spread: true, autoSpeed: 30, pauseOnLeave: true, pauseOnMinimize: true, previousKey: 'Left', nextKey: 'Right', singleMode: 'horizontal', singleSpeed: 2, singleFontSize: 15 };
 function camel(value) { if (Array.isArray(value))
     return value.map(camel); if (value && typeof value === 'object')
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k[0].toLowerCase() + k.slice(1), camel(v)])); return value; }

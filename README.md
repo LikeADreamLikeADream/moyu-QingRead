@@ -84,6 +84,7 @@ Windows 解压后运行 `轻阅.exe`；macOS 解压后打开 `.app`；Linux 解�
 
 - 字体支持导入 TTF、OTF、WOFF、WOFF2，并在字体下拉菜单内按字体名称搜索。导入字体会复制到应用数据目录并自动应用；“删除字体”仅删除当前选中的导入副本，不删除系统字体或原始文件，相关书籍回退到默认字体。
 - 字体、背景和单行模式采用一致的浮层下拉菜单样式：点击展开，再次点击收起；点击菜单外部也会收起。字体菜单内支持搜索；背景提供纸张、明亮、夜间、护眼，单行模式提供横向滚动、纵向滚动。
+- “字体加粗”开关即时应用于正文及单行阅读，按书籍保存；关闭开关或恢复阅读默认值可取消加粗。
 - 文字颜色和背景颜色分别提供“重置”，恢复当前主题默认颜色。
 - 颜色选择浮层支持色块、RGB 滑块和十六进制颜色值；点击外部区域或按 Esc 收起。
 - 点击阅读设置面板外的区域会隐藏面板，已打开的颜色及下拉浮层也会关闭。
@@ -99,7 +100,7 @@ Windows 解压后运行 `轻阅.exe`；macOS 解压后打开 `.app`；Linux 解�
 
 开发环境使用 Node.js 24 和 pnpm 11.25.0；依赖版本由 `electron/pnpm-lock.yaml` 锁定。当前 Electron 版本为 44.7.0。
 
-项目使用 pnpm 11.25.0；首次使用前可执行 `npm install -g pnpm@11.25.0` 安装。依赖下载到项目外的共享仓库，可用 `pnpm --dir electron store path` 查看位置。`electron/pnpm-workspace.yaml` 使用隔离依赖布局，通过符号链接组织依赖，并通过硬链接复用共享仓库文件。项目中仍保留 `electron/node_modules/`，不要手动移动它。
+项目使用 pnpm 11.25.0；首次使用前可执行 `npm install -g pnpm@11.25.0` 安装。依赖下载到项目外的共享仓库，可用 `pnpm --dir electron store path` 查看位置。`electron/pnpm-workspace.yaml` 使用隔离依赖布局，通过符号链接组织依赖，并通过硬链接复用共享仓库文件；当前打包流程已按此布局验证。项目中仍保留 `electron/node_modules/`，不要手动移动它。
 
 根目录统一提供 `pnpm run deps:install`、`pnpm start`、`pnpm run build`、`pnpm test` 和 `pnpm run package`。仅使用 pnpm 安装依赖，避免生成不同的锁文件。
 
@@ -120,22 +121,21 @@ pnpm run build
 
 上述命令可在项目根目录执行；也可进入 `electron/` 使用原有命令。`electron/src/` 是当前源码，必须保留。
 
-## 本地 Windows 打包
+## 打包
 
-先通过托盘菜单“退出”关闭正在运行的轻阅，避免文件占用。在项目根目录执行：
+先通过托盘菜单“退出”关闭正在运行的轻阅，避免文件占用。在 `electron` 目录执行：
 
 ```powershell
-pnpm --dir electron exec install-electron
-pnpm run package
+pnpm run package --config.electronDist=node_modules/electron/dist
 ```
 
-上述命令先下载本地 Electron 运行时，再编译并生成 Windows 运行目录：
+该命令使用 `pnpm install --frozen-lockfile` 安装的本地 Electron 运行时，编译并生成 Windows 运行目录：
 
 ```text
 artifacts/QingRead-Electron/win-unpacked/
 ```
 
-本地打包命令默认只更新 exe 运行目录，**不生成或更新压缩包**；仅在明确需要时单独压缩。已有 ZIP 文件可能早于最新运行目录，分发前需按需更新。
+当前默认只更新 exe 运行目录，**不生成或更新压缩包**；仅在明确需要时单独压缩。已有 ZIP 文件可能早于最新运行目录，分发前需按需更新。
 
 需要压缩包时，在项目根目录执行：
 

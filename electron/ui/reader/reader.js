@@ -32,7 +32,7 @@ function configure(){
  root.setProperty('--font',`${Math.max(12,Math.min(36,settings.fontSize||20))}px`);
  root.setProperty('--line',String(settings.lineHeight||1.9));root.setProperty('--family',settings.font||'Microsoft YaHei');
  const margin=Math.min(settings.margin??48,Math.max(8,viewport.clientWidth/8));root.setProperty('--margin',margin+'px');
- document.body.classList.toggle('compact',!!settings.compact);document.body.classList.toggle('paged',settings.mode==='paged');
+ document.body.classList.toggle('bold',!!settings.fontBold);document.body.classList.toggle('compact',!!settings.compact);document.body.classList.toggle('paged',settings.mode==='paged');
  const columns=settings.spread&&viewport.clientWidth>=700?2:1;
  content.style.columnCount=settings.mode==='paged'?String(columns):'';
  content.style.columnWidth=settings.mode==='paged'?Math.max(80,(viewport.clientWidth-2*margin*columns)/columns)+'px':'';

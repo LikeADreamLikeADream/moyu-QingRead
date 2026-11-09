@@ -26,15 +26,23 @@ The release workflow is configured for these targets. macOS and Linux have not y
 Run the application from:
 
 ```text
-artifacts/QingRead-Electron/win-unpacked/轻阅.exe
+./artifacts/QingRead-Electron/win-unpacked/轻阅.exe
 ```
 
-Keep the entire `win-unpacked` directory; copying only the executable is insufficient. Rebuilding updates this project output only, not copies extracted elsewhere. Before replacing a separate installation directory, quit QingRead from the tray, replace the complete application directory, and ensure shortcuts point to the updated executable.
+Keep the entire `win-unpacked` directory; copying only the executable is insufficient. Node.js and development tools are not required to run it.
+
+The latest application on the current development machine is:
+
+```text
+.\artifacts\QingRead-Electron\win-unpacked\轻阅.exe
+```
+
+Rebuilding updates this project output only, not copies extracted elsewhere. Before replacing a separate installation directory, quit QingRead from the tray, replace the complete application directory, and ensure shortcuts point to the updated executable.
 
 - The application starts in a small window. The upper-right controls provide transparency, opacity, always-on-top, window size, minimize, and close actions.
 - Closing hides the window to the system tray and saves your reading position. Double-click the tray icon or choose the tray menu's show/restore action to return.
 - To quit completely, choose the tray menu's exit action.
-- The default boss key is `Alt+Z`. It hides or restores the window and can be changed in reading settings.
+- The default boss key is `Ctrl+Alt+Z`. It hides or restores the window and can be changed in reading settings.
 
 ## Library
 
@@ -78,6 +86,7 @@ Adjust font size, line spacing, margins, fonts, themes, text and background colo
 
 - Import TTF, OTF, WOFF, or WOFF2 fonts and search the font dropdown by name. Imported fonts are copied to the application data directory and applied immediately. Deleting a font removes only the selected imported copy, preserving system fonts and original files; affected books fall back to the default font.
 - Font, background, and single-line controls use matching popup dropdowns. Click to open, click again or outside to close. Fonts support search; backgrounds include paper, light, night, and eye-care themes; single-line mode supports horizontal and vertical scrolling.
+- The bold font toggle immediately applies to the book text and single-line reading, and is saved per book. Turn it off or restore the default reading settings to remove bold formatting.
 - Text and background colors each have a reset action that restores the current theme's defaults.
 - Color popups support swatches, RGB sliders, and hexadecimal values. Click outside or press Esc to dismiss them.
 - Clicking outside reading settings closes the panel and any open color or dropdown popups.
@@ -112,18 +121,17 @@ pnpm run build
 
 Root scripts provide dependency installation, startup, compilation, tests, and Windows packaging through `pnpm run deps:install`, `pnpm start`, `pnpm run build`, `pnpm test`, and `pnpm run package`. You can also run the corresponding scripts inside `electron/`. Keep `electron/src/` as the source of truth.
 
-Dependencies are stored in a shared store outside the project; use `pnpm --dir electron store path` to locate it. `electron/pnpm-workspace.yaml` configures isolated dependencies with symbolic links and hard links to shared package files. Do not manually move `electron/node_modules/`.
+Dependencies are stored in a shared store outside the project; use `pnpm --dir electron store path` to locate it. `electron/pnpm-workspace.yaml` configures isolated dependencies with symbolic links and hard links to shared package files. The current packaging process has been verified with this layout. Do not manually move `electron/node_modules/`.
 
-## Local Windows packaging
+## Packaging
 
-Quit QingRead from the tray before rebuilding to avoid locked files. From the project root:
+Quit QingRead from the tray before rebuilding to avoid locked files. From the `electron` directory:
 
-```sh
-pnpm --dir electron exec install-electron
-pnpm run package
+```powershell
+pnpm run package --config.electronDist=node_modules/electron/dist
 ```
 
-These commands download the local Electron runtime, compile the application, and generate:
+This command uses the local Electron runtime installed through `pnpm install --frozen-lockfile`, compiles the application, and generates the Windows application directory:
 
 ```text
 artifacts/QingRead-Electron/win-unpacked/
@@ -175,7 +183,7 @@ Book metadata, progress, and settings are stored in SQLite. Text and images are 
 
 ## Verification
 
-From the project root or `electron/`:
+From the `electron` directory:
 
 ```sh
 pnpm test
@@ -239,6 +247,6 @@ Automated checks do not guarantee compatibility with every book. MOBI/KF8 varian
 - Regenerate `electron/dist/` with `pnpm run build`. Reinstall `electron/node_modules/` with `pnpm run deps:install` from the project root.
 - `artifacts/` contains application directories, archives, older versions, and temporary check data. It is not source code. Older versions and unneeded results can be removed; some specialized checks need packaged output or earlier results, which must then be regenerated.
 - If running from the project, keep the complete `artifacts/QingRead-Electron/win-unpacked/` directory, not just the executable. A distributed application does not require the project's `electron/` directory.
-- Everyday library data, progress, settings, and imported fonts are stored outside `artifacts/`. Do not delete the data directory when cleaning build or check output. When set, `QINGREAD_READER_DATA` determines the data location.
+- Everyday library data, progress, settings, and imported fonts are stored in `%LOCALAPPDATA%/QingRead.Reader`, outside `artifacts/`. Do not delete the data directory when cleaning build or check output. When set, `QINGREAD_READER_DATA` determines the data location.
 
 Further documentation is currently in Chinese: [Electron architecture](docs/Electron架构说明.md), [Development and packaging](docs/开发与打包说明.md), and [Verification](docs/验证说明.md).
