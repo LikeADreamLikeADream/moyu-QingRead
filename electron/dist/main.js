@@ -317,7 +317,7 @@ else
                 save();
                 return settings;
             }
-            if (!['list', 'open', 'preferences', 'position', 'search', 'bookmarks', 'addBookmark', 'removeBookmark', 'category', 'removeBook', 'editBook'].includes(method))
+            if (!['annotations', 'saveAnnotation', 'removeAnnotation', 'list', 'open', 'preferences', 'position', 'search', 'bookmarks', 'addBookmark', 'removeBookmark', 'category', 'removeBook', 'editBook'].includes(method))
                 throw new Error('Unsupported operation');
             return rpc(method, data);
         });

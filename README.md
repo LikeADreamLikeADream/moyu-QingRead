@@ -80,7 +80,9 @@ Windows 解压后运行 `轻阅.exe`；macOS 解压后打开 `.app`；Linux 解�
 
 ### 阅读设置
 
-支持字号、行距、边距、字体、主题、文字颜色、背景颜色、紧凑段落、宽窗双栏、自动阅读参数与快捷键等。
+支持字号、行距、左右边距、上下边距、字体、主题、文字颜色、背景颜色、紧凑段落、宽窗双栏、自动阅读参数与快捷键等。
+
+- 上下边距范围为 0–96 像素，默认 32 像素；同时调整正文顶部和底部留白，适用于滚动和翻页模式，按书籍保存。小窗高度不足时会自动限制实际边距。
 
 - 字体支持导入 TTF、OTF、WOFF、WOFF2，并在字体下拉菜单内按字体名称搜索。导入字体会复制到应用数据目录并自动应用；“删除字体”仅删除当前选中的导入副本，不删除系统字体或原始文件，相关书籍回退到默认字体。
 - 字体、背景和单行模式采用一致的浮层下拉菜单样式：点击展开，再次点击收起；点击菜单外部也会收起。字体菜单内支持搜索；背景提供纸张、明亮、夜间、护眼，单行模式提供横向滚动、纵向滚动。
@@ -192,6 +194,8 @@ pnpm test
 项目根目录中的专项检查：
 
 - `tests/electron-native-package-check.cjs`：加载打包内模块，检查解析及存储功能；需使用打包 Electron 的 Node 运行模式执行。
+- `tests/annotations-store-check.cjs`：划线位置校验、搜索、更新、重启恢复和删除同步。
+- `tests/annotations-ui-check.cjs`：独立数据目录中的真实 Electron 划线与笔记流程，包含鼠标点击、跨段落和三处删除同步。
 - `tests/bookmark-replace-check.cjs`：同位置书签覆盖、列表顺序与重启保留。
 - `tests/jump-return-check.cjs`：目录、搜索、书签跳转及返回、连续跳转保留首次起点与书籍切换清理。
 - `tests/jump-noop-check.cjs`：未改变阅读位置时不显示返回入口、不重置计时。
@@ -223,6 +227,8 @@ pnpm test
 | `electron/src/book-parser.ts` | 后台线程中的 TXT / EPUB / MOBI / KF8 解析 |
 | `electron/src/fonts.ts` | 导入字体的复制、校验、去重及删除 |
 | `electron/ui/app.js`、`app.css`、`index.html` | 书架、设置、菜单和阅读界面 |
+| `electron/ui/annotations.js` | 笔记书籍、书内笔记、划线编辑及删除同步 |
+| `electron/ui/reader/annotations.js` | 原文选择、划线渲染及选中文字工具栏 |
 | `electron/ui/i18n.js` | 界面词条、中英切换及动态控件翻译；排除书籍内容和信息 |
 | `electron/ui/reader/` | 正文渲染、分页、滚动、自动阅读和位置恢复 |
 | `electron/dist/` | TypeScript 编译输出，由 `pnpm run build` 重新生成 |

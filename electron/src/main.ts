@@ -111,7 +111,7 @@ else app.whenReady().then(async()=>{
    settings={...settings,...data};settings.opacity=Math.max(.01,Math.min(1,Number(settings.opacity)||1));
    win.setOpacity(settings.opacity);win.setAlwaysOnTop(Boolean(settings.topmost));win.setContentProtection(Boolean(settings.captureProtection));tray.setToolTip(settings.hideTrayText?'':'轻阅');save();return settings;
   }
-  if(!['list','open','preferences','position','search','bookmarks','addBookmark','removeBookmark','category','removeBook','editBook'].includes(method))throw new Error('Unsupported operation');
+  if(!['annotations','saveAnnotation','removeAnnotation','list','open','preferences','position','search','bookmarks','addBookmark','removeBookmark','category','removeBook','editBook'].includes(method))throw new Error('Unsupported operation');
   return rpc(method,data);
  });
  const icon=nativeImage.createFromPath(path.join(uiRoot,'tray.png'));

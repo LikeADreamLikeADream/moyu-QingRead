@@ -4,7 +4,7 @@ let data=null, settings={}, lastOffset=0, loading=false, auto=false, frame=0, la
 const send=(type,extra={})=>parent.postMessage({type,token:data?.token,...extra}, location.origin);
 const blocks=()=>Array.from(content.children);
 const single=document.getElementById('single');let singleOffset=0,singleText='',singleCarry=0;
-function showSingle(offset){singleOffset=Math.max(0,Math.min(data?.length||0,Math.floor(offset)));single.textContent=singleText.slice(singleOffset).replace(/\n/g,' ');lastOffset=singleOffset;}
+function showSingle(offset){singleOffset=Math.max(0,Math.min(data?.length||0,Math.floor(offset)));single.textContent=singleText.slice(singleOffset).replace(/\n/g,' ');lastOffset=singleOffset;if(typeof annotatedText==='function')annotatedText(single,single.textContent,singleOffset);}
 const measure=document.createElement('canvas').getContext('2d');
 function singleStep(){
  measure.font=getComputedStyle(single).font;const text=singleText.slice(singleOffset).replace(/\n/g,' ');
@@ -27,11 +27,13 @@ function configure(){
  pagedEnd?.remove();pagedEnd=null;
  const themes={paper:['#f7f2e8','#333c38'],light:['#ffffff','#303735'],night:['#202725','#c4cdc5'],green:['#e4eee5','#2c4737']};
  const t=themes[settings.theme]||themes.paper, root=document.documentElement.style;
+ document.body.classList.toggle('transparent',!!settings.transparent);
  root.setProperty('--paper',settings.transparent?'transparent':settings.backgroundColor||t[0]);root.setProperty('--ink',settings.textColor||(settings.transparent?'#7C8490':t[1]));
  root.setProperty('--single-font',(settings.singleFontSize||15)+'px');document.body.classList.toggle('single',!!settings.single);
  root.setProperty('--font',`${Math.max(12,Math.min(36,settings.fontSize||20))}px`);
  root.setProperty('--line',String(settings.lineHeight||1.9));root.setProperty('--family',settings.font||'Microsoft YaHei');
  const margin=Math.min(settings.margin??48,Math.max(8,viewport.clientWidth/8));root.setProperty('--margin',margin+'px');
+ const verticalMargin=Math.min(Math.max(0,settings.verticalMargin??32),96,Math.max(0,(viewport.clientHeight-48)/2));root.setProperty('--vertical-margin',verticalMargin+'px');
  document.body.classList.toggle('bold',!!settings.fontBold);document.body.classList.toggle('compact',!!settings.compact);document.body.classList.toggle('paged',settings.mode==='paged');
  const columns=settings.spread&&viewport.clientWidth>=700?2:1;
  content.style.columnCount=settings.mode==='paged'?String(columns):'';
@@ -84,7 +86,7 @@ async function loadChapter(payload,offset,prefs){
   else {e.textContent=block.text;if(!block.text)e.append(document.createElement('br'));}
   fragment.append(e);start+=block.text.length+1;
  }
- content.append(fragment);configure();const imagesReady=Promise.all(Array.from(content.querySelectorAll('img')).map(i=>i.decode().catch(()=>{})));
+ content.append(fragment);configure();renderAnnotations();const imagesReady=Promise.all(Array.from(content.querySelectorAll('img')).map(i=>i.decode().catch(()=>{})));
  if(settings.mode==='paged')await imagesReady;await document.fonts.ready;
  await new Promise(requestAnimationFrame);alignPagedEnd();restore(offset);loading=false;scrollEdgePending=false;report();send('loaded');
  if(settings.mode!=='paged'){const interaction=readingInteraction;imagesReady.then(()=>{if(data===payload&&readingInteraction===interaction&&!loading&&!auto){restore(offset);report();}});}

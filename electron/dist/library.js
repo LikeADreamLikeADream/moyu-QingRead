@@ -9,7 +9,7 @@ const node_path_1 = __importDefault(require("node:path"));
 const node_crypto_1 = require("node:crypto");
 const node_sqlite_1 = require("node:sqlite");
 const node_worker_threads_1 = require("node:worker_threads");
-const defaults = { fontSize: 20, lineHeight: 1.9, margin: 48, theme: 'paper', font: 'Microsoft YaHei', fontBold: false, mode: 'scroll', compact: false, autoSeconds: 20, textColor: null, backgroundColor: null, spread: true, autoSpeed: 30, pauseOnLeave: true, pauseOnMinimize: true, previousKey: 'Left', nextKey: 'Right', singleMode: 'horizontal', singleSpeed: 2, singleFontSize: 15 };
+const defaults = { fontSize: 20, lineHeight: 1.9, margin: 48, verticalMargin: 32, theme: 'paper', font: 'Microsoft YaHei', fontBold: false, mode: 'scroll', compact: false, autoSeconds: 20, textColor: null, backgroundColor: null, spread: true, autoSpeed: 30, pauseOnLeave: true, pauseOnMinimize: true, previousKey: 'Left', nextKey: 'Right', singleMode: 'horizontal', singleSpeed: 2, singleFontSize: 15 };
 function camel(value) { if (Array.isArray(value))
     return value.map(camel); if (value && typeof value === 'object')
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k[0].toLowerCase() + k.slice(1), camel(v)])); return value; }
@@ -29,6 +29,7 @@ class Library {
  CREATE TABLE IF NOT EXISTS book_details(book_id TEXT PRIMARY KEY REFERENCES books(id),author TEXT NOT NULL,cover TEXT,category TEXT NOT NULL DEFAULT '未分类');
  CREATE TABLE IF NOT EXISTS reader_positions(book_id TEXT PRIMARY KEY REFERENCES books(id),chapter_key TEXT NOT NULL,offset INTEGER NOT NULL CHECK(offset>=0),percent REAL NOT NULL CHECK(percent>=0 AND percent<=100),updated_at TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS bookmarks(id TEXT PRIMARY KEY,book_id TEXT NOT NULL REFERENCES books(id),chapter_key TEXT NOT NULL,offset INTEGER NOT NULL CHECK(offset>=0),label TEXT NOT NULL,UNIQUE(book_id,chapter_key,offset));
+ CREATE TABLE IF NOT EXISTS annotations(id TEXT PRIMARY KEY,book_id TEXT NOT NULL REFERENCES books(id) ON DELETE CASCADE,chapter_key TEXT NOT NULL,start INTEGER NOT NULL,end INTEGER NOT NULL,quote TEXT NOT NULL,note TEXT NOT NULL DEFAULT '',color TEXT NOT NULL,updated_at TEXT NOT NULL,UNIQUE(book_id,chapter_key,start,end));
  CREATE TABLE IF NOT EXISTS preferences(book_id TEXT PRIMARY KEY REFERENCES books(id),json TEXT NOT NULL);`);
     }
     dir(id) { if (!/^[a-f0-9]{32}$/.test(id))
@@ -179,6 +180,30 @@ class Library {
                     throw Error('书签名称最多 200 个字符。');
                 this.db.prepare('INSERT OR REPLACE INTO bookmarks VALUES(?,?,?,?,?)').run((0, node_crypto_1.randomUUID)().replaceAll('-', ''), id, data.position.chapterKey, data.position.offset, data.label);
                 return this.call('bookmarks', { id });
+            case 'annotations': {
+                if (id)
+                    this.row(id);
+                const rows = this.db.prepare(`SELECT a.id,a.book_id bookId,a.chapter_key chapterKey,a.start,a.end,a.quote,a.note,a.color,a.updated_at updatedAt,b.title,COALESCE(d.category,'未分类') category FROM annotations a JOIN books b ON b.id=a.book_id LEFT JOIN book_details d ON d.book_id=b.id WHERE (? IS NULL OR a.book_id=?) ORDER BY a.updated_at DESC,a.rowid DESC`).all(id || null, id || null);
+                const query = String(data.query || '').trim().toLowerCase();
+                return query ? rows.filter(a => (a.quote + ' ' + a.note + ' ' + a.title + ' ' + a.category).toLowerCase().includes(query)) : rows;
+            }
+            case 'saveAnnotation': {
+                this.row(id);
+                const book = this.load(id), c = book.chapters.find((c) => c.key === data.chapterKey);
+                const start = Number(data.start), end = Number(data.end);
+                if (!c || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start || end > c.text.length)
+                    throw Error('无效划线位置');
+                const color = String(data.color || '#ffe08a');
+                if (!/^#[a-f0-9]{6}$/i.test(color))
+                    throw Error('无效划线颜色');
+                const key = (0, node_crypto_1.randomUUID)().replaceAll('-', '');
+                this.db.prepare('INSERT INTO annotations(id,book_id,chapter_key,start,end,quote,note,color,updated_at) VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(book_id,chapter_key,start,end) DO UPDATE SET note=excluded.note,color=excluded.color,updated_at=excluded.updated_at').run(key, id, c.key, start, end, c.text.slice(start, end), String(data.note || ''), color, new Date().toISOString());
+                return this.call('annotations', { id });
+            }
+            case 'removeAnnotation': {
+                this.db.prepare('DELETE FROM annotations WHERE id=?').run(String(data.annotationId));
+                return true;
+            }
             case 'removeBookmark':
                 this.db.prepare('DELETE FROM bookmarks WHERE id=?').run(data.bookmarkId);
                 return true;
